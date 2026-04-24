@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AfterShip Affiliate — Battlecards</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f7f7f5; color: #1a1a1a; min-height: 100vh; }
+
+  /* HEADER */
+  .header { background: #000; padding: 18px 32px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-mark { width: 28px; height: 28px; }
+  .logo-text { color: #fff; font-size: 15px; font-weight: 600; letter-spacing: -0.3px; }
+  .logo-text span { color: #FF6B2B; }
+  .header-badge { background: #FF6B2B; color: #fff; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; letter-spacing: 0.02em; }
+
+  /* LAYOUT */
+  .container { max-width: 980px; margin: 0 auto; padding: 32px 24px; }
+
+  /* POSITIONING BANNER */
+  .positioning { background: #fff; border: 1px solid #e8e8e8; border-left: 4px solid #FF6B2B; border-radius: 8px; padding: 16px 20px; margin-bottom: 28px; }
+  .positioning-label { font-size: 10px; font-weight: 700; color: #FF6B2B; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .positioning-text { font-size: 14px; color: #333; line-height: 1.6; }
+  .positioning-text strong { color: #000; }
+
+  /* COMPETITOR TABS */
+  .tabs-wrapper { margin-bottom: 20px; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tab { font-size: 12px; font-weight: 500; padding: 7px 14px; border: 1px solid #ddd; border-radius: 6px; background: #fff; color: #555; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .tab:hover { border-color: #FF6B2B; color: #FF6B2B; }
+  .tab.active { background: #FF6B2B; border-color: #FF6B2B; color: #fff; }
+
+  /* CARD */
+  .card { display: none; background: #fff; border: 1px solid #e8e8e8; border-radius: 10px; overflow: hidden; }
+  .card.active { display: block; }
+
+  /* CARD HEADER */
+  .card-header { padding: 20px 24px 16px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+  .card-header-left .comp-name { font-size: 20px; font-weight: 700; color: #000; letter-spacing: -0.3px; }
+  .card-header-left .comp-type { font-size: 13px; color: #777; margin-top: 3px; }
+  .watch-out { display: inline-flex; align-items: center; gap: 6px; background: #fff4ef; border: 1px solid #ffd5c0; border-radius: 6px; padding: 6px 12px; font-size: 12px; color: #c94a00; font-weight: 500; white-space: nowrap; flex-shrink: 0; }
+  .watch-out::before { content: "⚑"; font-size: 11px; }
+
+  /* TWO COLUMN */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid #f0f0f0; }
+  .col { padding: 20px 24px; }
+  .col:first-child { border-right: 1px solid #f0f0f0; }
+  .col-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+  .col:first-child .col-title { color: #cc3300; }
+  .col:last-child .col-title { color: #1a7a4a; }
+  .diff-list { list-style: none; }
+  .diff-list li { font-size: 13px; color: #333; padding: 4px 0 4px 20px; position: relative; line-height: 1.55; }
+  .diff-list li::before { content: ""; position: absolute; left: 0; top: 9px; width: 8px; height: 8px; border-radius: 50%; }
+  .col:first-child .diff-list li::before { background: #e8503a; }
+  .col:last-child .diff-list li::before { background: #2eaa6a; }
+
+  /* OBJECTIONS */
+  .section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #999; padding: 14px 24px 8px; border-bottom: 1px solid #f8f8f8; }
+  .obj-item { border-bottom: 1px solid #f4f4f4; }
+  .obj-item:last-child { border-bottom: none; }
+  .obj-q { padding: 13px 24px; font-size: 13px; font-weight: 600; color: #222; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 12px; transition: background 0.1s; }
+  .obj-q:hover { background: #fafafa; }
+  .obj-q .toggle { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid #ddd; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #aaa; flex-shrink: 0; transition: all 0.2s; line-height: 1; }
+  .obj-q.open .toggle { background: #FF6B2B; border-color: #FF6B2B; color: #fff; transform: rotate(45deg); }
+  .obj-a { display: none; padding: 0 24px 14px 36px; font-size: 13px; color: #444; line-height: 1.7; border-left: 3px solid #FF6B2B; margin: 0 24px 12px; border-radius: 0 4px 4px 0; background: #fff9f7; }
+  .obj-a.visible { display: block; }
+
+  /* TRAP QUESTIONS */
+  .trap-section { padding: 16px 24px; background: #fafafa; border-top: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; }
+  .trap-section .section-title { padding: 0 0 10px; border: none; }
+  .trap-list { list-style: none; }
+  .trap-list li { font-size: 13px; color: #333; padding: 5px 0 5px 24px; position: relative; line-height: 1.55; font-style: italic; }
+  .trap-list li::before { content: "?"; position: absolute; left: 0; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: #FF6B2B; color: #fff; font-size: 10px; font-style: normal; font-weight: 700; display: flex; align-items: center; justify-content: center; line-height: 16px; text-align: center; }
+
+  /* CLOSE */
+  .close-row { padding: 16px 24px; display: flex; align-items: flex-start; gap: 12px; }
+  .close-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #FF6B2B; white-space: nowrap; padding-top: 2px; }
+  .close-text { font-size: 13px; color: #333; line-height: 1.6; font-style: italic; }
+
+  /* FOOTER */
+  .footer { text-align: center; padding: 24px; font-size: 12px; color: #bbb; }
+
+  @media (max-width: 600px) {
+    .two-col { grid-template-columns: 1fr; }
+    .col:first-child { border-right: none; border-bottom: 1px solid #f0f0f0; }
+    .card-header { flex-direction: column; }
+    .watch-out { white-space: normal; }
+    .container { padding: 20px 16px; }
+    .header { padding: 14px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <svg class="logo-mark" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="28" height="28" rx="6" fill="#FF6B2B"/>
+      <path d="M7 14L12 19L21 9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span class="logo-text">AfterShip <span>Affiliate</span></span>
+  </div>
+  <div class="header-badge">Battlecards</div>
+</div>
+
+<div class="container">
+
+  <div class="positioning">
+    <div class="positioning-label">Core positioning</div>
+    <div class="positioning-text"><strong>AfterShip Affiliate</strong> is the TikTok Shop creator platform for brands that need a single platform to find, activate, and measure creators who actually drive revenue — 5M+ creators with verified sales history, the most advanced AI search, and GMV attribution in one place.</div>
+  </div>
+
+  <div class="tabs-wrapper">
+    <div class="tabs">
+      <button class="tab active" onclick="show('tiktok', this)">TikTok Affiliate Center</button>
+      <button class="tab" onclick="show('shopify', this)">Shopify Collabs</button>
+      <button class="tab" onclick="show('snowball', this)">Social Snowball</button>
+      <button class="tab" onclick="show('trendio', this)">Trendio</button>
+      <button class="tab" onclick="show('superfiliate', this)">Superfiliate</button>
+      <button class="tab" onclick="show('reacher', this)">Reacher</button>
+      <button class="tab" onclick="show('euka', this)">Euka</button>
+      <button class="tab" onclick="show('cruva', this)">Cruva</button>
+    </div>
+  </div>
+
+  <!-- TIKTOK -->
+  <div id="card-tiktok" class="card active">
+    <div class="card-header">
+      <div class="card-header-left">
+        <div class="comp-name">TikTok Shop Affiliate Center</div>
+        <div class="comp-type">Native TikTok platform tool</div>
+      </div>
+      <div class="watch-out">Free — but severely limited</div>
+    </div>
+    <div class="two-col">
+      <div class="col">
+        <div class="col-title">Their weaknesses</div>
+        <ul class="diff-list">
+          <li>No proactive creator search — brands wait for creators to apply</li>
+          <li>Zero outreach automation — every message is manual</li>
+          <li>No verified GMV data on creators before you invite them</li>
+          <li>Analytics locked to TikTok only — no cross-channel view</li>
+          <li>No AI-powered creator matching by niche or style</li>
+        </ul>
+      </div>
+      <div class="col">
+        <div class="col-title">Our advantages</div>
+        <ul class="diff-list">
+          <li>5M+ creators with verified sales history — know who converts before outreach</li>
+          <li>AI search: describe your ideal creator in plain language</li>
+          <li>Automated DMs, emails, follow-ups to 10,000 creators/day</li>
+          <li>Full GMV attribution per creator in one dashboard</li>
+          <li>Built on top of TikTok Shop — not a replacement, an upgrade</li>
+        </ul>
+      </div>
+    </div>
+    <div class="section-title">Objection handling</div>
+    <div class="obj-item"><div class="obj-q" onclick="toggle(this)">"Why pay for AfterShip when TikTok gives me this for free?" <span class="toggle">+</span></div><div class="obj-a">The Affiliate Center is free the same way a blank spreadsheet is free. It's a starting point, not a program. You're limited to waiting for creators to find you, and when they do, you have no data to know if they actually drive sales. AfterShip gives you the search, the outreach, and the attribution so every decision is backed by performance data, not gut feel. The question isn't what it costs — it's what inaction costs when your competitors are running 10,000 outreach messages a day.</div></div>
+    <div class="obj-item"><div class="obj-q" onclick="toggle(this)">"We're already getting creator applications through the Affiliate Center." <span class="toggle">+</span></div><div class="obj-a">Inbound applications are a good sign — it means there's demand. But inbound-only means you only see creators who already know you. AfterShip lets you find the creators your competitors haven't reached yet, filter by verified GMV, and reach them at scale. Most brands that grow to 200+ active affiliates do it through proactive outreach, not waiting.</div></div>
+    <div class="obj-item"><div class="obj-q" onclick="toggle(this)">"We don't have budget for another platform right now." <span class="toggle">+</span></div><div class="obj-a">Totally fair. How many hours a week is your team spending on manual creator outreach and tracking right now? Most teams spend 10+ hours on tasks AfterShip automates completely. The question is whether the time cost and missed GMV from slower activation is more or less than the platform fee.</div></div>
+    <div class="trap-section">
+      <div class="section-title">Trap-setting questions</div>
+      <ul class="trap-list">
+        <li>How do you currently identify which creators in your program are actually driving GMV vs. just posting?</li>
+        <li>How long does it take your team to recruit and activate 50 new creators today?</li>
+        <li>When a creator doesn't post, how do you follow up with them?</li>
+      </ul>
+    </div>
+    <div class="close-row"><div class="close-label">Close</div><div class="close-text">"TikTok's Affiliate Center is a great start — AfterShip is how you scale it. Every brand that goes from 10 to 500 active affiliates needs search, outreach automation, and attribution. That's exactly what we're built for."</div></div>
+  </div>
+
+  <!-- SHOPIFY -->
+  <div id="card-shopify" class="card">
+    <div class="card-header">
+      <div class="card-header-left">
+        <div class="comp-name">Shopify Collabs</div>
+        <div class="comp-type">Shopify-native affiliate tool</div>
+      </div>
+      <div class="watch-out">Shopify-only, DTC-focused</div>
+    </div>
+    <div class="two-col">
+      <div class="col">
+        <div class="col-title">Their weaknesses</div>
+        <ul class="diff-list">
+          <li>Requires Shopify — useless if brand isn't on Shopify</li>
+          <li>Creator search limited to Collabs network — not the broader TikTok creator pool</li>
+          <li>No verified TikTok GMV data on creators</li>
+          <li>No outreach automation at scale</li>
+          <li>TikTok integration is surface-level — not purpose-built for TikTok Shop</li>
+        </ul>
+      </div>
+      <div class="col">
+        <div class="col-title">Our advantages</div>
+        <ul class="diff-list">
+          <li>5M+ creators with actual verified TikTok sales history</li>
+          <li>AI search built specifically for TikTok Shop creator discovery</li>
+          <li>Platform-agnostic — works for any brand, not just Shopify merchants</li>
+          <li>Automated outreach to 10,000 creators/day</li>
+          <li>GMV attribution per creator, per video, in one dashboard</li>
+        </ul>
+      </div>
+    </div>
+    <div class="section-title">Objection handling</div>
+    <div class="obj-item"><div class="obj-q" onclick="toggle(this)">"Shopify Collabs is included in our plan — it's basically free." <span class="toggle">+</span></div><div class="obj-a">Collabs is a solid perk, but it's built for Shopify's DTC affiliate use case — not for scaling a TikTok Shop creator program. The creators in Collabs are there to promote Shopify stores. AfterShip's 5M+ creators have verified TikTok sales history, so you know exactly who drives GMV on TikTok before you reach out. You're comparing a general-purpose tool with a TikTok-native one.</div></div>
+    <div class="obj-item"><div class="obj-q" onclick="toggle(this)">"We want to keep our tools consolidated in Shopify." <span class="toggle">+</span></div><div class="obj-a">That makes total sense for your DTC store operations. AfterShip actually complements Shopify — it's your TikTok Shop creator layer on top. Most brands run Shopify for their DTC store and AfterShip for TikTok Shop affiliate management because TikTok Shop is a separate channel with different creator dynamics.</div></div>
+    <div class="trap-section">
+      <div class="section-title">Trap-setting questions</div>
+      <ul class="trap-list">
+        <li>What percentage of your TikTok Shop GMV is currently coming from creator-driven sales vs. organic?</li>
+        <li>How do you verify that a creator has actually driven sales on TikTok Shop before inviting them to your program?</li>
+        <li>Does your current setup let you reach out to 1,000 creators in a day without manual work?</li>
+      </ul>
+    </div>
+    <div class="close-row"><div class="close-label">Close</div><div class="close-text">"Shopify Collabs is great for your DTC affiliate channel. AfterShip is your TikTok Shop creator engine. Most growing brands need both — they solve different problems."</div></div>
+  </div>
+
+  <!-- SOCIAL SNOWBALL -->
+  <div id="card-snowball" class="card">
+    <div class="card-header">
+      <div class="card-header-left">
+        <div class="comp-name">Social Snowball</div>
+        <div class="comp-type">Shopify-native affiliate & referral platform</div>
+      </div>
+      <div class="watch-out">$199+/mo + 3% revenue share</div>
+    </div>
+    <div class="two-col">
+      <div class="col">
+        <div class="col-title">Their weaknesses</div>
+        <ul class="diff-list">
+          <li>Shopify-exclusive — brands not on Shopify can't use it</li>
+          <li>Charges 3% of affiliate revenue on top of monthly fee</li>
+          <li>TikTok integration is a sync layer — not built for TikTok Shop creator discovery</li>
+          <li>No AI creator search with verified GMV data</li>
+          <li>Focused on referrals, not proactive creator recruitment</li>
+        </ul>
+      </div>
+      <div class="col">
+        <div class="col-title">Our advantages</div>
+        <ul class="diff-list">
+          <li>No revenue share — predictable flat pricing</li>
+          <li>5M+ TikTok creators with verified sales history</li>
+          <li>Purpose-built for TikTok Shop — not retrofitted</li>
+          <li>AI search to find creators by niche, style, audience</li>
+          <li>Outreach automation at scale — 10,000/day</li>
+        </ul>
+      </div>
+    </div>
+    <div class="section-title">Objection handling</div>
+    <div class="obj-item"><div class="obj-q" onclick="toggle(this)">"Social Snowball seems cheaper at $199/month." <span class="toggle">+</span></div><div class="obj-a">The headline price looks lower, but Social Snowball adds a 3% revenue share on all affiliate-generated sales. At $50K in affiliate GMV per month, that's $1,500/month on top of the subscription — before you factor in what you're not getting: proactive creator discovery, AI search, and outreach automation at scale. AfterShip's pricing is flat and predictable.</div></div>
+    <div class="obj-item"><div class="obj-q" onclick="toggle(this)">"We already use Social Snowball for our DTC referral program." <span class="toggle">+</span></div><div class="obj-a">That's a great use case for Social Snowball — customer referrals is their core strength. AfterShip is complementary: we're your TikTok Shop creator acquisition and management layer. Many brands run both — Social Snowball for customer referrals on their DTC store, AfterShip for TikTok Shop affiliate program management.</div></div>
+    <div class="trap-section">
+      <div class="section-title">Trap-setting questions</div>
+      <ul class="trap-list">
+        <li>How are you currently finding net-new creators — not customers, but content creators?</li>
+        <li>Have you calculated what the 3% revenue share costs at your projected affiliate GMV scale?</li>
+        <li>How do you identify creators with a proven TikTok Shop sales track record before recruiting them?</li>
+      </ul>
+    </div>
+    <div class="close-row"><div class="close-label">Close</div><div class="close-text">"Social Snowball is built for customer referrals. AfterShip is built for TikTok Shop creator programs. At scale, the 3% revenue share adds up fast — and you still don't get proactive creator search or outreach automation."</div></div>
+  </div>
+
+  <!-- TRENDIO -->
+  <div id="card-trendio" class="card">
+    <div class="card-header">
+      <div class="card-header-left">
+        <div class="comp-name">Trendio</div>
+        <div class="comp-type">Video commerce agency + platform</div>
+      </div>
+      <div class="watch-out">Agency model — they run your program</div>
+    </div>
+    <div class="two-col">
+      <div class="col">
+        <div class="col-title">Their weaknesses</div>
+        <ul class="diff-list">
+          <li>Agency model — you're outsourcing control, not gaining it</li>
+          <li>2M creator network vs. AfterShip's 5M+ with verified sales data</li>
+          <li>Higher cost — agency fees on top of platform</li>
+          <li>You don't own the creator relationships — they do</li>
+          <li>Slower to scale — briefing loops add friction</li>
+        </ul>
+      </div>
+      <div class="col">
+        <div class="col-title">Our advantages</div>
+        <ul class="diff-list">
+          <li>Self-serve — you control your program and own creator relationships</li>
+          <li>5M+ creators with verified GMV data — larger and more qualified pool</li>
+          <li>Every decision backed by your performance data, not an agency</li>
+          <li>Predictable SaaS pricing vs. agency retainers</li>
+          <li>Faster activation — outreach goes same day, no briefing lag</li>
+        </ul>
+      </div>
+    </div>
+    <div class="section-title">Objection handling</div>
+    <div class="obj-item"><div class="obj-q" onclick="toggle(this)">"Trendio handles everything — we don't have to do anything." <span class="toggle">+</span></div><div class="obj-a">That's the pitch, but it's also the risk. When an agency runs your program, you don't build internal expertise, you don't own the creator relationships, and if you ever part ways, you're starting from zero. AfterShip lets you build a creator program that belongs to your brand — with automation handling the scale so you're not doing it manually either.</div></div>
+    <div class="obj-item"><div class="obj-q" onclick="toggle(this)">"Trendio has better AI matching for video performance." <span class="toggle">+</span></div><div class="obj-a">Trendio's video AI is focused on content optimization after the creator is already in your program. AfterShip's AI works upstream — finding the right creators before you invest in them, using verified sales history so you're not guessing who converts. Start with the right creators.</div></div>
+    <div class="trap-section">
+      <div class="section-title">Trap-setting questions</div>
+      <ul class="trap-list">
+        <li>If you end your relationship with Trendio, what happens to the creator relationships they've built for you?</li>
+        <li>How much visibility do you have into which specific creators are driving your GMV right now?</li>
+        <li>What does the agency model cost vs. running the program yourself with AfterShip?</li>
+      </ul>
+    </div>
+    <div class="close-row"><div class="close-label">Close</div><div class="close-text">"Trendio runs your program — AfterShip empowers your team to own it. At scale, owning your creator relationships and data is a competitive moat. Outsourcing it means starting over if anything changes."</div></div>
+  </div>
+
+  <!-- SUPERFILIATE -->
+  <div id="card-superfiliate" class="card">
+    <div class="card-header">
+      <div class="card-header-left">
+        <div class="comp-name">Superfiliate</div>
+        <div class="comp-type">Multi-channel affiliate & influencer platform</div>
+      </div>
+      <div class="watch-out">Multi-channel, not TikTok-native</div>
+    </div>
+    <div class="two-col">
+      <div class="col">
+        <div class="col-title">Their weaknesses</div>
+        <ul class="diff-list">
+          <li>Built for multi-channel — not TikTok Shop native</li>
+          <li>No AI creator search with verified TikTok GMV data</li>
+          <li>Co-branded landing pages lose TikTok native checkout advantage</li>
+          <li>No outreach automation at TikTok scale</li>
+          <li>Complex setup for teams focused on TikTok Shop</li>
+        </ul>
+      </div>
+      <div class="col">
+        <div class="col-title">Our advantages</div>
+        <ul class="diff-list">
+          <li>Purpose-built for TikTok Shop — native checkout stays intact</li>
+          <li>5M+ creators with verified TikTok sales history</li>
+          <li>AI search by niche, content style, and audience fit</li>
+          <li>Automated outreach — 10,000 creators/day</li>
+          <li>Every dollar of GMV tracked per creator without redirect friction</li>
+        </ul>
+      </div>
+    </div>
+    <div class="section-title">Objection handling</div>
+    <div class="obj-item"><div class="obj-q" onclick="toggle(this)">"Superfiliate lets us manage all our channels in one place." <span class="toggle">+</span></div><div class="obj-a">Multi-channel management sounds efficient, but TikTok Shop has very different dynamics than Instagram or YouTube affiliate programs. A platform built for all channels is usually optimized for none specifically. If TikTok Shop is a priority, you want a tool built specifically for how TikTok creator commerce works — search, outreach, GMV attribution, all native to the platform.</div></div>
+    <div class="trap-section">
+      <div class="section-title">Trap-setting questions</div>
+      <ul class="trap-list">
+        <li>What percentage of your affiliate revenue is coming from TikTok Shop specifically?</li>
+        <li>Does your current tool let you search for creators by their TikTok Shop sales history — not just follower count?</li>
+        <li>When a creator drives a sale through a co-branded page, does that go through TikTok's native checkout?</li>
+      </ul>
+    </div>
+    <div class="close-row"><div class="close-label">Close</div><div class="close-text">"Superfiliate is great for brands managing multiple affiliate channels equally. If TikTok Shop is where your growth is happening, you want a tool built for TikTok Shop — not one that treats it as one of many channels."</div></div>
+  </div>
+
+  <!-- REACHER -->
+  <div id="card-reacher" class="card">
+    <div class="card-header">
+      <div class="card-header-left">
+        <div class="comp-name">Reacher</div>
+        <div class="comp-type">TikTok Shop outreach automation tool</div>
+      </div>
+      <div class="watch-out">Outreach only — missing discovery & attribution</div>
+    </div>
+    <div class="two-col">
+      <div class="col">
+        <div class="col-title">Their weaknesses</div>
+        <ul class="diff-list">
+          <li>Outreach automation only — limited creator discovery and search</li>
+          <li>No verified GMV data on creators before outreach</li>
+          <li>No AI-powered creator matching by niche or content style</li>
+          <li>Point solution — no tracking, attribution, or analytics</li>
+          <li>You still need other tools to run a complete creator program</li>
+        </ul>
+      </div>
+      <div class="col">
+        <div class="col-title">Our advantages</div>
+        <ul class="diff-list">
+          <li>Full platform: search + outreach + tracking + attribution in one place</li>
+          <li>5M+ creators with verified TikTok sales history for smarter targeting</li>
+          <li>AI search — find the right creators before you send a single message</li>
+          <li>GMV attribution per creator so you measure what actually works</li>
+          <li>No stitching together multiple tools</li>
+        </ul>
+      </div>
+    </div>
+    <div class="section-title">Objection handling</div>
+    <div class="obj-item"><div class="obj-q" onclick="toggle(this)">"Reacher is cheaper and does what we need — outreach." <span class="toggle">+</span></div><div class="obj-a">If outreach is all you need, Reacher is fine. But outreach without targeting is spray and pray. AfterShip lets you search 5M+ creators by verified GMV, niche, and content style before you send a message — so your outreach goes to the right people. And after they join, you get full attribution so you know which creators are actually driving revenue. It's one platform instead of three.</div></div>
+    <div class="obj-item"><div class="obj-q" onclick="toggle(this)">"We already have our creator list — we just need to reach them." <span class="toggle">+</span></div><div class="obj-a">That's a great starting point. AfterShip handles that outreach and adds attribution tracking so you know which of those creators are actually converting. And when you're ready to grow beyond your existing list, the discovery is already built in — you won't need to add another tool.</div></div>
+    <div class="trap-section">
+      <div class="section-title">Trap-setting questions</div>
+      <ul class="trap-list">
+        <li>Once a creator joins your program, how do you track which ones are actually driving GMV vs. just posting?</li>
+        <li>How do you currently build your target creator list — what data do you use to decide who to reach out to?</li>
+        <li>How many tools does your team currently use to run your full creator program end to end?</li>
+      </ul>
+    </div>
+    <div class="close-row"><div class="close-label">Close</div><div class="close-text">"Reacher does one thing. AfterShip does the whole thing — find the right creators, reach them at scale, and track every dollar they drive. Fewer tools, better outcomes."</div></div>
+  </div>
+
+  <!-- EUKA -->
+  <div id="card-euka" class="card">
+    <div class="card-header">
+      <div class="card-header-left">
+        <div class="comp-name">Euka</div>
+        <div class="comp-type">TikTok Shop affiliate management platform</div>
+      </div>
+      <div class="watch-out">Growth-stage focused, limited at scale</div>
+    </div>
+    <div class="two-col">
+      <div class="col">
+        <div class="col-title">Their weaknesses</div>
+        <ul class="diff-list">
+          <li>Smaller creator database — less discovery depth</li>
+          <li>Less established — limited track record at enterprise scale</li>
+          <li>Fewer integrations and analytics depth</li>
+          <li>No AI search with verified GMV data at AfterShip's scale</li>
+          <li>Best for early-stage brands — limited enterprise capabilities</li>
+        </ul>
+      </div>
+      <div class="col">
+        <div class="col-title">Our advantages</div>
+        <ul class="diff-list">
+          <li>5M+ creators with 200K+ verified sales history — largest qualified pool</li>
+          <li>Most advanced AI creator search in the market</li>
+          <li>Scales from 10 to 10,000 active creators without switching platforms</li>
+          <li>Full GMV attribution dashboard — per creator, per video</li>
+          <li>Proven at enterprise scale</li>
+        </ul>
+      </div>
+    </div>
+    <div class="section-title">Objection handling</div>
+    <div class="obj-item"><div class="obj-q" onclick="toggle(this)">"Euka seems simpler and easier to get started with." <span class="toggle">+</span></div><div class="obj-a">Simple to start is valuable — and AfterShip is built to be fast to launch too. The difference shows up at scale. When you're managing 500+ creators and need to know which 50 are driving 80% of your GMV, or when you want to find 100 new creators in a specific niche this week, you need the depth AfterShip provides. Starting simple is fine; outgrowing your tool in 6 months isn't.</div></div>
+    <div class="trap-section">
+      <div class="section-title">Trap-setting questions</div>
+      <ul class="trap-list">
+        <li>Where do you see your creator program in 12 months — how many active affiliates do you expect to manage?</li>
+        <li>How important is it that the tool you choose today can scale with you without a platform migration?</li>
+        <li>Does Euka give you creator search based on verified TikTok sales history, or just follower metrics?</li>
+      </ul>
+    </div>
+    <div class="close-row"><div class="close-label">Close</div><div class="close-text">"Euka is built for early-stage programs. AfterShip is built to scale. If you're serious about making TikTok Shop a major revenue channel, you want the platform that can take you there without switching tools mid-growth."</div></div>
+  </div>
+
+  <!-- CRUVA -->
+  <div id="card-cruva" class="card">
+    <div class="card-header">
+      <div class="card-header-left">
+        <div class="comp-name">Cruva</div>
+        <div class="comp-type">TikTok Shop creator management tool</div>
+      </div>
+      <div class="watch-out">Emerging — unproven at scale</div>
+    </div>
+    <div class="two-col">
+      <div class="col">
+        <div class="col-title">Their weaknesses</div>
+        <ul class="diff-list">
+          <li>Early-stage — limited scale and proven track record</li>
+          <li>Smaller creator database than AfterShip</li>
+          <li>Less advanced AI search and matching capabilities</li>
+          <li>Unproven at managing large-scale creator programs</li>
+          <li>Limited analytics and attribution depth</li>
+        </ul>
+      </div>
+      <div class="col">
+        <div class="col-title">Our advantages</div>
+        <ul class="diff-list">
+          <li>5M+ creators with verified sales history — the largest qualified pool</li>
+          <li>Most advanced AI creator search built for TikTok Shop</li>
+          <li>Proven at scale — hundreds to thousands of active creators</li>
+          <li>Full GMV attribution per creator in one dashboard</li>
+          <li>Established platform with active product development and support</li>
+        </ul>
+      </div>
+    </div>
+    <div class="section-title">Objection handling</div>
+    <div class="obj-item"><div class="obj-q" onclick="toggle(this)">"Cruva is newer and might be more innovative / cheaper." <span class="toggle">+</span></div><div class="obj-a">New tools can be exciting. The risk with early-stage platforms is that your creator program becomes a beta test. AfterShip has the creator database, the AI infrastructure, and the proven track record to run your program reliably right now. When it comes to your core revenue channel, proven beats promise.</div></div>
+    <div class="obj-item"><div class="obj-q" onclick="toggle(this)">"Cruva is less expensive right now." <span class="toggle">+</span></div><div class="obj-a">Early pricing is usually introductory — it changes once they raise or build out the platform. More importantly, the cost of a limited creator database or unreliable attribution is measured in missed GMV, not subscription fees. The ROI on getting creator programs right from the start far outweighs the platform cost difference.</div></div>
+    <div class="trap-section">
+      <div class="section-title">Trap-setting questions</div>
+      <ul class="trap-list">
+        <li>How long has Cruva been running creator programs — can they show you brands at the scale you're targeting?</li>
+        <li>What's their creator database size, and how many have verified TikTok sales history?</li>
+        <li>What happens to your program if they pivot, get acquired, or shut down?</li>
+      </ul>
+    </div>
+    <div class="close-row"><div class="close-label">Close</div><div class="close-text">"New platforms take risks with your program. AfterShip is the proven choice — 5M+ creators, best-in-class AI search, and GMV attribution that actually works. Don't make your creator program a beta test."</div></div>
+  </div>
+
+  <div class="footer">AfterShip Affiliate — Internal Sales Use Only · Last updated April 2026</div>
+
+</div>
+
+<script>
+  function show(id, btn) {
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('card-' + id).classList.add('active');
+    btn.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  function toggle(el) {
+    var ans = el.nextElementSibling;
+    var isOpen = ans.classList.contains('visible');
+    document.querySelectorAll('.obj-a').forEach(a => a.classList.remove('visible'));
+    document.querySelectorAll('.obj-q').forEach(q => q.classList.remove('open'));
+    if (!isOpen) { ans.classList.add('visible'); el.classList.add('open'); }
+  }
+</script>
+</body>
+</html>
